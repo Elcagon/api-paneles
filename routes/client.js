@@ -69,7 +69,7 @@ function panelNotExist(req, res, next){
   })
 }
 
-
+//Get clients
 router.get('/', function(req, res){
   Client.find({}, function(err, clients){
     if(err){
@@ -89,6 +89,7 @@ router.get('/', function(req, res){
   })
 })
 
+//Create new client
 router.post('/', clientNotExist, function(req, res){
   if(req.body.name && req.body.userid){
     var newClient = new Client()
@@ -113,6 +114,7 @@ router.post('/', clientNotExist, function(req, res){
   }
 })
 
+//Eliminated client
 router.delete('/:userid', clientExist, function(req, res){
   if(!req.client){
     res.status(404)
@@ -135,31 +137,35 @@ router.delete('/:userid', clientExist, function(req, res){
   }
 })
 
-router.get('/:userid/panels', findClient, function(req, res){
+//Find Panels (doubts if it's right!)(eer 160, throw)
+router.get('/:userid/panels', clientExist, panelExist, function(req, res){
   if(!req.client){
     res.status(404)
-    res.send('user not found')
+    res.send('Client not found')
   }
   else {
-    req.client.populate({
-      path : 'panels',
-      select : 'panelid location'
-    }, function(err, client){
-      if(err){
-        res.status(500)
-        res.send(err)
-      }
-      else {
-        if(client.panels.length > 0){
-          res.status(200)
-          res.send(client.panels)
+    if(!req.panel){
+      res.status(404)
+      res.send('This user don´t have panels')
+    }
+    else {
+      Panel.find({}, function(err, panels){
+        if(err){
+          res.status(500)
+          res.send(err)
         }
         else {
-          res.status(404)
-          res.send("not panels found")
+          if(panels.length > 0){
+            res.status(200)
+            res.send(panels)
+          }
+          else{
+            res.status(404)
+            res.send('No panels where found for this client')
+          }
         }
-      }
-    })
+      })
+    }
   }
 })
 
@@ -202,26 +208,7 @@ router.post('/:userid/', clientExist, panelNotExist, function(req, res){
   }
 })
 
-router.delete('/:userid/:panelid', findClient, findPanel, function(req,res){
-  if(!req.panel){
-    res.status(404)
-    res.send('Panel not found')
-  }
-  else {
-    req.panel.remove(function(err){
-      if(err){
-        res.status(500)
-        res.send(err)
-      }
-      else{
-        res.status(200)
-        res.json({
-          message : 'Panel deleted',
-          panel : req.panel
-        })
-      }
-    })
-  }
+router.delete('/:userid/:panelid', clientExist, panelExist, function(req,res){
 })
 
 module.exports = router
