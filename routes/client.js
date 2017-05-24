@@ -69,7 +69,7 @@ function panelNotExist(req, res, next){
   })
 }
 
-//Get clients
+//Get clients (getting a double get request)
 router.get('/', function(req, res){
   Client.find({}, function(err, clients){
     if(err){
@@ -137,7 +137,7 @@ router.delete('/:userid', clientExist, function(req, res){
   }
 })
 
-//Find Panels (doubts if it's right!)(eer 160, throw)
+//Find Panels (doubts if it's right!)
 router.get('/:userid/panels', clientExist, panelExist, function(req, res){
   if(!req.client){
     res.status(404)
