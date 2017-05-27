@@ -24,7 +24,7 @@ router.get('/', function(req, res){
   })
 })
 
-//Find clients
+//created clients
 router.post('/', Client.findClient(false, false), function(req, res){
   if(req.body.name && req.body.userid){
     var newClient = new Client()
