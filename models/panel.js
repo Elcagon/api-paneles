@@ -19,8 +19,8 @@ panelSchema.statics.findPanel = function(require = true, full = false){
           if(require){
             if(full){
               panel.populate({
-                path : 'reads'
-                select : 'power temperature radiation'//posible error
+                path : 'reads',
+                select : 'power temperature radiation'
               }, function(err, panel_pop){
                 if(err){
                   res.status(500)
