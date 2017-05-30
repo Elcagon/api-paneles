@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Client = require('../models/client')
 var Panel = require('../models/panel')
+var Read = require('../models/read')
 
 
 //Get clients
@@ -115,7 +116,6 @@ router.post('/:userid/', Client.findClient(true, true), Panel.findPanel(false, f
         // actualizar el cliente con el nuevo panelid
         req.client.update({$push :{'panels': newPanel}},function(error){
           if (error) {
-            console.log(error);
             res.status(500)
             res.send(error)
           }
@@ -169,6 +169,45 @@ router.delete('/:userid/:panelid', Client.findClient(true, true), Panel.findPane
 
 //Get Panel by id from user
 router.get('/:userid/:panelid', Client.findClient(true, true), Panel.findPanel(true, false), function(req, res){
+  res.status(200)
+  res.send(req.panel && req.client)
+})
+
+//Post reads from a specific panel
+router.post('/:userid/:panelid/', Client.findClient(true, true), Panel.findPanel(true, false), function(req, res){
+  if(req.client && req.panel){
+    var newRead = new Read()
+    newRead.current = req.body.current
+    newRead.temperature = req.body.temperature
+    newRead.radiation = req.body.radiation
+    newRead.time = req.body.time
+    newRead.save(function(err){
+      if(err){
+        res.status(500)
+        res.send(err)
+      }
+      else{
+        req.panel.update({$push :{'reads': newRead}},function(err){
+          if(err){
+            res.status(500)
+            res.send(err)
+          }
+          else{
+            res.status(201)
+            res.json({
+              status : "Sucess",
+              // payload : newRead,
+              message : "Reads created"
+            })
+          }
+        })
+      }
+    })
+  }
+})
+
+//Get reads for a specific panel
+router.get('/:userid/:panelid/reads',Client.findClient(true, true), Panel.findPanel(true, true), function(req, res){
   res.status(200)
   res.send(req.panel)
 })
