@@ -4,7 +4,7 @@ var Client = require('../models/client')
 var Panel = require('../models/panel')
 
 
-//Get clients (getting a double get request)
+//Get clients
 router.get('/', function(req, res){
   Client.find({}, function(err, clients){
     if(err){
@@ -49,6 +49,7 @@ router.post('/', Client.findClient(false, false), function(req, res){
   }
 })
 
+//Get client by id
 router.get('/:userid', Client.findClient(true, true), function(req, res){
   res.status(200)
   res.send(req.client)
@@ -79,78 +80,97 @@ router.delete('/:userid', Client.findClient(true, true), function(req, res){
   })
 })
 
-//Find Panels (need Panel.findPanel)
-// router.get('/:userid/panels', clientExist, panelExist, function(req, res){
-//   if(!req.client){
-//     res.status(404)
-//     res.send('Client not found')
-//   }
-//   else {
-//     if(!req.panel){
-//       res.status(404)
-//       res.send('This user don´t have panels')
-//     }
-//     else {
-//       Panel.find({}, function(err, panels){
-//         if(err){
-//           res.status(500)
-//           res.send(err)
-//         }
-//         else {
-//           if(panels.length > 0){
-//             res.status(200)
-//             res.send(panels)
-//           }
-//           else{
-//             res.status(404)
-//             res.send('No panels where found for this client')
-//           }
-//         }
-//       })
-//     }
-//   }
-// })
-//
-// router.post('/:userid/', clientExist, panelNotExist, function(req, res){
-//   if(!req.client){
-//     res.status(404)
-//     res.send('user not found')
-//   }
-//   else {
-//     if(req.body.panelid){
-//       var newPanel = new Panel()
-//       newPanel.panelid = req.body.panelid
-//       newPanel.location = req.body.location
-//       newPanel.save(function(err) {
-//         if(err){
-//           res.status(500)
-//           res.send(err)
-//         }
-//         else {
-//           req.client.update({$push : {panels : newPanel}}, function(err){
-//             if(err){
-//               res.status(500)
-//               res.send(err)
-//             }
-//             else {
-//               res.status(200)
-//               res.send({
-//                 messaje : 'panel created',
-//                 panel : newPanel
-//               })
-//             }
-//           })
-//         }
-//       })
-//     }
-//     else {
-//       res.status(400)
-//       res.send('invalid parameters')
-//     }
-//   }
-// })
-//
-// router.delete('/:userid/:panelid', clientExist, panelExist, function(req,res){
-// })
+//Get panels from userid
+router.get('/:userid/panels', Client.findClient(true, true), function(req, res){
+  req.client.panels.forEach(function(err, panel){
+    if(err){
+      res.status(500)
+      res.send(err)
+    }
+    else {
+      if(panels.length > 0){
+        res.status(200)
+        res.send(panels)
+      }
+      else {
+        res.status(404)
+        res.send('Not panels found found')
+      }
+    }
+  })
+})
+
+//Create new panels for a specific client (Missing message update)
+router.post('/:userid/', Client.findClient(true, true), Panel.findPanel(false, false), function(req, res){
+  if(req.body.panelid && req.body.location && req.params.userid){
+    var newPanel = new Panel()
+    newPanel.panelid = req.body.panelid
+    newPanel.location = req.body.location
+    newPanel.save(function(err){
+      if(err){
+        res.status(500)
+        res.send(err)
+      }
+      else{
+        // actualizar el cliente con el nuevo panelid
+        req.client.update({$push :{'panels': newPanel}},function(error){
+          if (error) {
+            console.log(error);
+            res.status(500)
+            res.send(error)
+          }
+          else{
+            res.status(201)
+            res.json({
+              status : "Sucess",
+              payload : newPanel,
+              message : "Panel created"
+            })
+          }
+        })
+      }
+    })
+  }
+  else{
+    res.status(400)
+    res.json({
+      error : 'Missing Parameters'
+    })
+  }
+})
+
+//Delete panels for a specific client
+router.delete('/:userid/:panelid', Client.findClient(true, true), Panel.findPanel(true, false), function(req, res){
+  if(req.params.userid && req.params.panelid){
+    req.client.update({$pull : {'panels': req.panel._id}}, function(err){
+      if(err){
+        res.status(500)
+        res.json({error: 'Error updating object'})
+      }
+      else{
+        req.panel.remove(function(err){
+          if(err){
+            res.status(500)
+            res.send(err)
+          }
+          else{
+            res.status(200)
+            res.json({
+              status : "Sucess",
+              payload : req.panel,
+              message : "Eliminated panel"
+            })
+          }
+        })
+      }
+    })
+  }
+})
+
+//Get Panel by id from user
+router.get('/:userid/:panelid', Client.findClient(true, true), Panel.findPanel(true, false), function(req, res){
+  res.status(200)
+  res.send(req.panel)
+})
 
 module.exports = router

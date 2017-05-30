@@ -8,7 +8,7 @@ var panelSchema = mongoose.Schema({
 )
 
 panelSchema.statics.findPanel = function(require = true, full = false){
-  return function(req, res, nexy) {
+  return function(req, res, next) {
     mongoose.model('Panel').findOne({panelid : req.params.panelid || req.body.panelid}).exec(function(err, panel){
       if(err){
         res.status(500)
@@ -21,7 +21,7 @@ panelSchema.statics.findPanel = function(require = true, full = false){
               panel.populate({
                 path : 'reads',
                 select : 'power temperature radiation'
-              }, function(err, panel_pop){
+              },function(err, panel_pop){
                 if(err){
                   res.status(500)
                   res.send(err)
@@ -38,14 +38,22 @@ panelSchema.statics.findPanel = function(require = true, full = false){
             }
           }
           else{
+            res.status(400)
+            res.json({
+              message : 'panel already exist in db'
+            })
+          }
+        }
+        else{
+          if(require){
             res.status(404)
             res.json({
               message : 'panel not found'
             })
           }
-        }
-        else{
-          next();
+          else{
+            next();
+          }
         }
       }
     })

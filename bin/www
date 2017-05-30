@@ -5,4 +5,4 @@ var port = process.env.PORT || 8080;
 
 server.listen(port)
 
-console.log('Magic happens on port ' + port);
+console.log('Magic when pigs fly! At time' + port);
