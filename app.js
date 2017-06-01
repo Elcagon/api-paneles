@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use('/client', client)
 
 app.get("/", function(req, res){
-  res.json({message:'Welcome!'})
+  res.json({message:'Welcome to Solari Panel DB!'})
 })
 
 app.all('*', function(req, res) {

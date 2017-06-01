@@ -82,16 +82,16 @@ router.delete('/:userid', Client.findClient(true, true), function(req, res){
 })
 
 //Get panels from userid
-router.get('/:userid/panels', Client.findClient(true, true), function(req, res){
-  req.client.panels.forEach(function(err, panel){
+router.get('/:userid/panels', Client.findClient(true, false), function(req, res){
+  req.client.populate({path : 'panels'}, function(err, client_pop){
     if(err){
       res.status(500)
       res.send(err)
     }
     else {
-      if(panels.length > 0){
+      if(client_pop.panels.length > 0){
         res.status(200)
-        res.send(panels)
+        res.send(client_pop.panels)
       }
       else {
         res.status(404)
@@ -170,7 +170,7 @@ router.delete('/:userid/:panelid', Client.findClient(true, true), Panel.findPane
 //Get Panel by id from user
 router.get('/:userid/:panelid', Client.findClient(true, true), Panel.findPanel(true, false), function(req, res){
   res.status(200)
-  res.send(req.panel && req.client)
+  res.send(req.panel)
 })
 
 //Post reads from a specific panel
