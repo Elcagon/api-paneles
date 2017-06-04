@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var cors = require('cors')
 var bodyParser = require('body-parser');
 var morgan = require('morgan')
 
@@ -14,6 +15,8 @@ mongoose.connect( process.env.MONGODB_URI || "mongodb://localhost:27017/sda");
 app.use(morgan('short'))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(cors())
 
 app.use('/client', client)
 
