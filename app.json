@@ -1,0 +1,9 @@
+{
+  "name": "api-paneles",
+  "description": "Api-rest panels",
+  "repository": "https://github.com/Elsarmi/api-paneles",
+  "image": "heroku/nodejs",
+  "addons" : [
+    "mongolab:sandbox"
+  ]
+}
