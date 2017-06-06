@@ -140,7 +140,7 @@ router.post('/:userid/', Client.findClient(true, true), Panel.findPanel(false, f
 })
 
 //Delete panels for a specific client
-router.delete('/:userid/:panelid', Client.findClient(true, true), Panel.findPanel(true, false), function(req, res){
+router.delete('/:userid/:panelid', Client.findClient(true, true), Panel.findPanel(true, true), function(req, res){
   if(req.params.userid && req.params.panelid){
     req.client.update({$pull : {'panels': req.panel._id}}, function(err){
       if(err){
@@ -154,6 +154,9 @@ router.delete('/:userid/:panelid', Client.findClient(true, true), Panel.findPane
             res.send(err)
           }
           else{
+            req.panel.reads.forEach(function(read) {
+              read.remove();
+            })
             res.status(200)
             res.json({
               status : "Sucess",
@@ -212,30 +215,20 @@ router.get('/:userid/:panelid/reads',Client.findClient(true, true), Panel.findPa
 })
 
 router.delete('/:userid/:panelid/reads', Client.findClient(true, true), Panel.findPanel(true, true), function(req, res){
-  if(req.params.userid && req.params.panelid){
-    var reads = new
-    req.panel.update({$pull : 'reads'}, function(err){
-      if(err){
-        res.status(500)
-        res.json({error: 'Error updating object'})
-      }
-      else{
-        req.panel.forEach(function(reads){
-          reads.remove(function(err){
-            if(err){
-              res.status(500)
-              res.send(err)
-            }
-          })
-        })
-      }
+  req.panel.reads.forEach(function(read){
+    read.remove()
+  })
+  req.panel.reads = []
+  req.panel.save(function(err){
+    if(err){
+      res.status(500)
+      res.send(err)
+    }
+    else {
       res.status(200)
-      res.json({
-        message : "Reads deleted",
-        client : req.panel
-      })
-    })
-  }
+      res.send(req.panel)
+    }
+  })
 })
 
 module.exports = router
