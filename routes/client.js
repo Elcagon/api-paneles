@@ -211,4 +211,31 @@ router.get('/:userid/:panelid/reads',Client.findClient(true, true), Panel.findPa
   res.send(req.panel)
 })
 
+router.delete('/:userid/:panelid/reads', Client.findClient(true, true), Panel.findPanel(true, true), function(req, res){
+  if(req.params.userid && req.params.panelid){
+    var reads = new
+    req.panel.update({$pull : 'reads'}, function(err){
+      if(err){
+        res.status(500)
+        res.json({error: 'Error updating object'})
+      }
+      else{
+        req.panel.forEach(function(reads){
+          reads.remove(function(err){
+            if(err){
+              res.status(500)
+              res.send(err)
+            }
+          })
+        })
+      }
+      res.status(200)
+      res.json({
+        message : "Reads deleted",
+        client : req.panel
+      })
+    })
+  }
+})
+
 module.exports = router
