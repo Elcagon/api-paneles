@@ -20,7 +20,7 @@ panelSchema.statics.findPanel = function(require = true, full = false){
             if(full){
               panel.populate({
                 path : 'reads',
-                select : 'power temperature radiation current'
+                select : 'power temperature radiation current time'
               },function(err, panel_pop){
                 if(err){
                   res.status(500)
