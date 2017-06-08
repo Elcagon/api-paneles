@@ -183,7 +183,7 @@ router.post('/:userid/:panelid/', Client.findClient(true, true), Panel.findPanel
     newRead.current = req.body.current
     newRead.temperature = req.body.temperature
     if(req.body.time){
-     newRead.time = req.body.time
+      newRead.time = req.body.time
     }
     newRead.save(function(err){
       if(err){
